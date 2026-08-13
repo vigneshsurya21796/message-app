@@ -1,0 +1,66 @@
+DEPLOYMENT INSTRUCTIONS
+========================
+Stack: React (Netlify) + Express/Socket.io (Render) + MongoDB Atlas + Cloudinary
+
+
+STEP 1 — Push to GitHub
+------------------------
+git add -A
+git commit -m "chore: prepare for cloud deployment"
+git push
+
+
+STEP 2 — Deploy Server on Render (render.com)
+----------------------------------------------
+1. New → Web Service → connect your GitHub repo
+2. Settings:
+   - Root Directory : server
+   - Build Command  : npm install
+   - Start Command  : npm start
+   - Environment    : Node
+3. Add environment variables:
+   - MONGODB_URI             = <your MongoDB Atlas connection string>
+   - JWT_SECRET              = <strong random secret>
+   - NODE_ENV                = production
+   - CLIENT_URL              = https://your-netlify-app.netlify.app  ← fill after Step 3
+   - CLOUDINARY_CLOUD_NAME   = <your value>
+   - CLOUDINARY_API_KEY      = <your value>
+   - CLOUDINARY_API_SECRET   = <your value>
+4. Deploy → copy the URL: https://your-render-app.onrender.com
+
+NOTE: Free tier spins down after 15 min of inactivity.
+      First request after idle takes ~30 seconds to wake up.
+
+
+STEP 3 — Deploy Client on Netlify (netlify.com)
+------------------------------------------------
+1. New site → Import from GitHub → connect your repo
+2. Settings:
+   - Base directory    : client
+   - Build command     : npm run build
+   - Publish directory : dist
+3. Add environment variable:
+   - VITE_SOCKET_URL = https://your-render-app.onrender.com  ← use URL from Step 2
+4. Deploy → copy the URL: https://your-netlify-app.netlify.app
+
+
+STEP 4 — Wire Up & Redeploy
+-----------------------------
+1. Update client/.env.production:
+   VITE_SOCKET_URL=https://your-render-app.onrender.com
+
+2. In Render dashboard, update CLIENT_URL env var to your actual Netlify URL.
+
+3. Trigger a manual redeploy on Render so the new CLIENT_URL takes effect.
+
+4. Trigger a redeploy on Netlify (or push a commit) so VITE_SOCKET_URL is baked in.
+
+
+STEP 5 — Verify
+----------------
+- [ ] Sign up and log in on the deployed URL
+- [ ] Send a text message between two users
+- [ ] Send an image (Cloudinary upload)
+- [ ] Open two browser tabs → messages arrive in real time (Socket.io)
+- [ ] Online user indicators update on connect/disconnect
+- [ ] Page refresh on any route does not return 404 (Netlify _redirects)
